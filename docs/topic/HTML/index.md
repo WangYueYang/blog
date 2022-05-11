@@ -41,7 +41,7 @@ meta 标签通常用于指定网页的描述，关键字，以及其他数据信
 
 Web Worker 的作用，就是为 JS 创造多线程环境。允许主线程创建 Worker 线程，将一些任务分配给后者运行。 [阮一峰-Web Worker 使用教程](https://www.ruanyifeng.com/blog/2018/07/web-worker.html)
 
-### 5. HTML5 离线缓存-manifest
+### 5. HTML5 离线缓存-manifest (被移除了，使用 Service Workers 替代)
 
 manifest 是一个后缀名为 manifest 的文件，在文件中定义那些需要缓存的文件，支持 manifest 的浏览器，会将按照 manifest 文件的规则将文件保存在本地，从而在没有网络的情况下，也能访问页面。
 
@@ -112,23 +112,27 @@ localStorage 和 sessionStorage 的不同: sessionStorage 代表的是一次会�
 ### 7. iframe 有那些优点和缺点？
 
 优点：
+
 - 用来加载速度较慢的内容（如广告）
 - 可以使脚本可以并行下载
 - 可以实现跨子域通信
 
 缺点：
+
 - iframe 会阻塞主页面的 onload 事件，可以通过动态给 iframe 的 src 赋值来解决
 - SEO 不友好
 - 浏览器的后退按钮失效
 - iframe 和主页面共享连接池，而浏览器对相同域的连接有限制，所以会影响页面的并行加载。
 
 ### 8. async 和 defer 的作用是什么？有什么区别？
+
 1. 脚本没有 async 和 defer 时会立即加载冰执行，不会等待后续载入文档元素，读到就加载并执行
 1. defer 表示延迟执行引入的 js，js 在加载时 HTML 并不会停止解析，这两个过程是并行的。当整个 document 解析完毕后再执行脚本文件，在 DOMContentLoaded 事件触发之前完成。多个脚本按顺序执行。
 1. async 属性表示异步执行引入的 JavaScript，与 defer 的区别在于，如果已经加载好，就会开始执行，也就是说它的执行仍然会阻塞文档的解析，只是它的加载过程不会阻塞。多个脚本的执行顺序无法保证。
 
 ### 9. 重绘和回流
-回流（Reflow）：当Render Tree中部分或全部元素的尺寸、结构、或某些属性发生改变时，浏览器重新渲染部分或全部文档的过程称为回流。
+
+回流（Reflow）：当 Render Tree 中部分或全部元素的尺寸、结构、或某些属性发生改变时，浏览器重新渲染部分或全部文档的过程称为回流。
 
 会导致回流的操作：
 
@@ -137,28 +141,59 @@ localStorage 和 sessionStorage 的不同: sessionStorage 代表的是一次会�
 1. 元素尺寸或位置发生改变
 1. 元素内容变化（文字数量或图片大小等等）
 1. 元素字体大小变化
-1. 添加或者删除可见的DOM元素
-1. 激活CSS伪类（例如：:hover）
+1. 添加或者删除可见的 DOM 元素
+1. 激活 CSS 伪类（例如：:hover）
 1. 查询某些属性或调用某些方法
 
-重绘（Repaint）：当页面中元素样式的改变并不影响它在文档流中的位置时（例如：color、background-color、visibility等），浏览器会将新样式赋予给元素并重新绘制它，这个过程称为重绘。
+重绘（Repaint）：当页面中元素样式的改变并不影响它在文档流中的位置时（例如：color、background-color、visibility 等），浏览器会将新样式赋予给元素并重新绘制它，这个过程称为重绘。
 
 一句话：回流必将引起重绘，重绘不一定会引起回流。而回流比重绘的代价要更高。
 
-简单总结一下：会引起元素位置变化的就会reflow，如上面介绍的，窗口大小改变、字体大小改变、以及元素位置改变，都会引起周围的元素改变他们以前的位置；不会引起位置变化的，只是在以前的位置进行改变背景颜色等，只会repaint；
+简单总结一下：会引起元素位置变化的就会 reflow，如上面介绍的，窗口大小改变、字体大小改变、以及元素位置改变，都会引起周围的元素改变他们以前的位置；不会引起位置变化的，只是在以前的位置进行改变背景颜色等，只会 repaint；
 
 如何避免：
 
 css:
-1. 避免使用 table 布局
-1. 尽可能在DOM树的最末端改变class。
-1. 避免设置多层内联样式
-1. 将动画效果应用到position属性为absolute或fixed的元素上
-1. 避免使用CSS表达式（例如：calc()）。
 
-js: 
-1. 避免频繁操作样式，最好一次性重写style属性，或者将样式列表定义为class并一次性更改class属性。
-1. 避免频繁操作DOM，创建一个documentFragment，在它上面应用所有DOM操作，最后再把它添加到文档中。
-1. 也可以先为元素设置display: none，操作结束后再把它显示出来。因为在display属性为none的元素上进行的DOM操作不会引发回流和重绘。
+1. 避免使用 table 布局
+1. 尽可能在 DOM 树的最末端改变 class。
+1. 避免设置多层内联样式
+1. 将动画效果应用到 position 属性为 absolute 或 fixed 的元素上
+1. 避免使用 CSS 表达式（例如：calc()）。
+
+js:
+
+1. 避免频繁操作样式，最好一次性重写 style 属性，或者将样式列表定义为 class 并一次性更改 class 属性。
+1. 避免频繁操作 DOM，创建一个 documentFragment，在它上面应用所有 DOM 操作，最后再把它添加到文档中。
+1. 也可以先为元素设置 display: none，操作结束后再把它显示出来。因为在 display 属性为 none 的元素上进行的 DOM 操作不会引发回流和重绘。
 1. 避免频繁读取会引发回流/重绘的属性，如果确实需要多次使用，就用一个变量缓存起来
 1. 对具有复杂动画的元素使用绝对定位，使它脱离文档流，否则会引起父元素及后续元素频繁回流。
+
+### 10. 文件上传
+
+单文件上传：
+```js
+var fileInput = document.getElementById('test-image-file'),
+  preview = document.getElementById('test-image-preview');
+
+fileInput.addEventListener('change', function () {
+  var file = fileInput.files[0];
+  var reader = new FileReader();
+
+  reader.onload = function (e) {
+    var data = e.target.result; // 'data:image/jpeg;base64,/9j/4AAQSk...(base64编码)...'
+    preview.style.backgroundImage = 'url(' + data + ')';
+  };
+
+  reader.readAsDataURL(file);
+});
+```
+多文件上传：
+
+使用 FormData() 把多个文件 append 到 FormData() 中去。 [FormData](https://developer.mozilla.org/zh-CN/docs/Web/API/FormData) [表单，FormData对象](https://wangdoc.com/javascript/bom/form.html#%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0)
+
+### 11. 用 div 模拟 textarea 的实现
+`<div class="edit" contenteditable="true">` 使用 contenteditable 属性
+
+### 12. 元素的alt和title有什么异同？
+在alt和title同时设置的时候，alt作为图片的替代文字出现，title是图片的解释文字
