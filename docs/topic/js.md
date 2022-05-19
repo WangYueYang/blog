@@ -211,7 +211,7 @@ class P {
       const resultFn = (data, i) => {
         num++;
         result[i];
-        if (p && typeof p.then === 'function') {
+        if (num === promiseArr.length) {
           resolve(result);
         }
       };
@@ -226,6 +226,24 @@ class P {
         }
       });
     });
+  }
+
+  static resolve(data) {
+    return new P((resolve) => {resolve(data)})
+  }
+
+  static reject(err) {
+    return new P((null, reject) => {reject(err)})
+  }
+
+  static race(promiseArr) {
+    return new P((resolve, reject) => {
+      for (let p of promiseArr) {
+        P.resolve(p).then(val => {
+          resolve(val)
+        }, reject)
+      }
+    })
   }
 
   then(onFulfilled, onRejected) {
@@ -260,5 +278,93 @@ class P {
 
     return promise2;
   }
+
+  catch(rejectFn) {
+    return this.then(null, rejectFn);
+  }
+
+  finally(callback) {
+    return this.then(
+      data => P.resolve(callback()).then(() => data),
+      err => P.resolve(callback()).then(() => data)
+    )
+  }
 }
+```
+
+### 11. 原型链继承
+
+```js
+function Car() {
+  this.colors = ['red', 'green'];
+}
+Car.prototype.say = function () {
+  console.log(this.name);
+};
+function MyCar() {}
+MyCar.prototype = new Car();
+```
+
+缺点：
+
+多个实例对引用类型的操作会被篡改。
+
+### 12. 构造函数继承
+
+```js
+function Car() {
+  this.colors = ['red', 'green'];
+}
+Car.prototype.say = function () {
+  console.log(this.name);
+};
+function MyCar() {
+  Car.call(this);
+}
+```
+
+缺点：
+
+1. 只能继承父类的实例属性和方法，不能继承原型属性/方法
+1. 无法实现复用，每个子类都有父类实例函数的副本，影响性能
+
+### 13. 组合继承
+
+```js
+function Car() {
+  this.colors = ['red', 'green'];
+}
+Car.prototype.say = function () {
+  console.log(this.name);
+};
+function MyCar() {
+  Car.call(this);
+}
+MyCar.prototype = new Car();
+```
+
+缺点：
+
+1. 会多次调用 new Car()，而且 MyCar 的实例对象上会存在两份相同的属性/方法
+
+### 14. 寄生组合继承
+
+```js
+function myExtends(child, parent) {
+  const p = Object.create(parent.prototype);
+  p.constructor = child;
+  child.prototype = p;
+}
+
+function Car() {
+  this.colors = ['red', 'green'];
+}
+Car.prototype.say = function () {
+  console.log(this.name);
+};
+function MyCar() {
+  Car.call(this);
+}
+
+myExtends(MyCar, Car);
 ```
