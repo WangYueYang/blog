@@ -78,7 +78,7 @@ return {
   dispatch,
 };
 
-// compose 会根据 chain 的 length 返回不同的结果，关于最后面的那个 reduce 后面再看。。。
+
 export default function compose(...funcs) {
   if (funcs.length === 0) {
     return (arg) => arg;
@@ -88,6 +88,7 @@ export default function compose(...funcs) {
     return funcs[0];
   }
 
+// 对于有多种中间件的情况下，如果不做函数组合的话，正常是  middleware1(middleware2(middleware3(...args))) 这种使用情况。。通过一下这种方式做一个函数组合
   return funcs.reduce(
     (a, b) =>
       (...args) =>
